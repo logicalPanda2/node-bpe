@@ -97,7 +97,7 @@ function register(vocab, pair) {
  * An empty `src` or `separators` will return 0.
  * @param {string} src
  * @param {string} separators
- * @returns {void}
+ * @returns {number}
  * @example
  * ```
  * const src = "Hello there";
@@ -142,4 +142,44 @@ function chunk(src, separators) {
     chunks.push(temp);
 
     return chunks;
+}
+/**
+ * Encodes a chunked string `chunked` into an
+ * array of tokens based on `vocab` greedily.
+ * @param {string[]} chunked 
+ * @param {Record<string, number>} vocab 
+ * @returns {number[]}
+ * @example
+ * ```
+ * const vocab = {
+ *      "Hello": 0,
+ *      "the": 1,
+ *      "re": 2,
+ *      " bro": 3,
+ *      ".": 4,
+ *      " ": 5,
+ *  };
+ *  const chunked = ["Hello", "there", " bro", "."];
+ *  const tokens = encode(chunked, vocab); // [0, 1, 2, 3, 4]
+ * ```
+ */
+function encode(chunked, vocab) {
+    const tokens = [];
+
+    for(let i = 0; i < chunked.length; i++) {
+        for(let j = chunked[i].length; j > 0; j--) {
+            const encoded = vocab[chunked[i].slice(0, j)];
+            if(encoded !== undefined) {
+                tokens.push(encoded);
+                if(j !== 0) {
+                    chunked[i] = chunked[i].slice(j);
+                    i--;
+                }
+
+                break;
+            }
+        }
+    }
+
+    return tokens;
 }
