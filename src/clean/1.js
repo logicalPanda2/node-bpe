@@ -33,3 +33,32 @@ function pfreq(tokenized, freqs) {
         freqs[pair] = (freqs[pair] ?? 0) + 1;
     }
 }
+/**
+ * Iterates through all pair frequencies and
+ * returns the pair with the highest number of occurences.
+ * If several pairs has the same frequency, `maxfreq` will
+ * return the first encountered pair. 
+ * If the pair with the maximum frequency 
+ * has a frequency 1, `maxfreq` will return null.
+ * @param {Record<string, number>} freqs 
+ * @returns {[string, number] | null}
+ * @example
+ * ```
+ * const freqs = {
+ *   "rt": 12,
+ *   "la": 12, 
+ *   "ds": 3,
+ * };
+ * const pair = maxfreq(freqs); // ["rt", 12]
+ */
+function maxfreq(freqs) {
+    const entries = Object.entries(freqs);
+
+    let max = 0;
+    for(let i = 0; i < entries.length; i++) {
+        if(entries[i][1] > entries[max][1])
+            max = i;
+    }
+
+    return entries[max][1] === 1 ? null : entries[max];
+}
