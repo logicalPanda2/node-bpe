@@ -165,14 +165,15 @@ function chunk(src, separators) {
  */
 function encode(chunked, vocab) {
     const tokens = [];
+    const temp = [...chunked];
 
-    for(let i = 0; i < chunked.length; i++) {
-        for(let j = chunked[i].length; j > 0; j--) {
-            const encoded = vocab[chunked[i].slice(0, j)];
+    for(let i = 0; i < temp.length; i++) {
+        for(let j = temp[i].length; j > 0; j--) {
+            const encoded = vocab[temp[i].slice(0, j)];
             if(encoded !== undefined) {
                 tokens.push(encoded);
                 if(j !== 0) {
-                    chunked[i] = chunked[i].slice(j);
+                    temp[i] = temp[i].slice(j);
                     i--;
                 }
 
