@@ -1,7 +1,7 @@
 /**
  * Iterates through `tokenized` and computes
  * the frequencies of all pairs' occurrences
- * without mutating existing properties in `freq`
+ * without mutating existing properties in `freq`.
  * @param {string} tokenized 
  * @param {Record<string, number>} freqs 
  * @returns {void}
@@ -15,7 +15,7 @@
  * 
  * // freqs is now:
  * {
- *   foo: 42,
+ *   "foo": 42,
  *   "H,e": 1, 
  *   "e,l": 1,
  *   "l,l": 2,
@@ -61,4 +61,33 @@ function maxfreq(freqs) {
     }
 
     return entries[max][1] === 1 ? null : entries[max];
+}
+/**
+ * Registers a new pair into the vocabulary.
+ * The value of the new string is the current 
+ * length of the vocabulary. Duplicate identifiers
+ * will not cause any side effects.
+ * @param {Record<string, number>} vocab
+ * @param {[string, number]} pair
+ * @returns {void}
+ * @example
+ * ```
+ * const vocab = {
+ *   "foo": 0,
+ * };
+ * const pair = ["hello", 23];
+ * register(vocab, pair);
+ * 
+ * // vocab is now:
+ * {
+ *   "foo": 0,
+ *   "hello": 1,
+ * };
+ * ```
+ */
+function register(vocab, pair) {
+    if(pair[0] in vocab) return;
+
+    const len = Object.entries(vocab).length;
+    vocab[pair[0]] = len;
 }
