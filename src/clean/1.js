@@ -114,3 +114,32 @@ function strpbrk(src, separators) {
 
     return 0;
 }
+/**
+ * Transforms the `src` string into chunks separated 
+ * by `separators`, inclusive of separators.
+ * @param {string} src 
+ * @param {string} separators 
+ * @returns {string[]}
+ * @example
+ * ```
+ * const src = "Yesterday I drank apple juice.";
+ * const separators = " .";
+ * const chunks = chunk(src, separators);
+ * // ['Yesterday', ' I', ' drank', ' apple', ' juice', '.']
+ * ```
+ */
+function chunk(src, separators) {
+    const chunks = [];
+    
+    let temp = src;
+    while(temp.length > 1) {
+        const id = strpbrk(temp, separators);
+        const newId = id ? id : (strpbrk(temp.slice(1), separators) + 1);
+        
+        chunks.push(temp.slice(0, newId));
+        temp = temp.slice(newId);
+    }
+    chunks.push(temp);
+
+    return chunks;
+}
