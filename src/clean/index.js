@@ -2,7 +2,7 @@ import * as lib from "./lib.js";
 
 // There are only 128 bytes, 
 // I have not found a workaround to include all 256 utf-8 bytes yet
-const vocab = {
+const __vocab__ = {
     '0': 48,
     '1': 49,
     '2': 50,
@@ -132,7 +132,7 @@ const vocab = {
     '~': 126,
     '\x7F': 127,
 };
-const inverse = {
+const __inverse__ = {
   '0': '\x00',
   '1': '\x01',
   '2': '\x02',
@@ -308,4 +308,4 @@ function tokenize(src, separators, vocab) {
     return tokens;
 }
 
-export { vocab, inverse, trainBPE, tokenize };
+export { __vocab__, __inverse__, trainBPE, tokenize };
