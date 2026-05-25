@@ -1,0 +1,46 @@
+WHAT?
+BPE aims to compress information by transforming tokens starting from the 256 numbers in the utf-8 encoding system into frequently occurring subwords (at least primarily), through the process of merging.
+
+HOW?
+Merging is done by iterating through the string and computing the number of occurrences of all possible overlapping n - 1 pairs, then combining the most frequently occurring pair into one token.
+An incredibly large corpus, terabytes in size, is repeatedly scanned and merged, often up to 50,000 - 100,000 merges, to create a complete vocabulary.
+
+IMPLEMENTATION
+The overall algorithm can be broken down into several parts, including a hidden step that is not usually discussed as part of the BPE at all (step 1):
+1. regex chunking: the source string is matched with a convoluted regex that splits it up into substrings, for example the string "hello there my friend." will be broken into ["hello", " there", " my", " friend", "."],
+2. encoding: the chunks are broken down into encoded versions. With standard utf-8, ["hello", " there", " my", " friend", "."] will turn into [
+    [ 72, 101, 108, 108, 111 ],
+    [ 32, 116, 104, 101, 114, 101 ],
+    [ 32, 109, 121 ],
+    [ 32, 102, 114, 105, 101, 110, 100 ],
+    [ 46 ],
+]
+3. pairing: all pairs WITHIN the bounds of encoded chunks are computed and tallied. If a pair occurred only 1 time but the chunk occured 2 times in the original sentence, the total frequency is 2.
+4. merging: the pair with the highest number of occurrences is merged into a new token. The new token is simply the current length of the vocabulary; the first merge of an initial utf-8 vocab occupies index 256.
+5. add: the new token is registered into the vocabulary.
+6. repeat from step 2 with the new vocabulary a set number of times.
+
+ROUGH ESTIMATE OF TIME COMPLEXITY
+--NAIVE--
+The regex chunking will take O(n * m) time with a strpbrk approach.
+The encoding will take O(n) time to encode all of the string.
+The pairing will take O(n - 1) time to iterate through all pairs.
+The merging will take O(n - 1) time to find the max.
+The add takes O(1).
+The total time of the algorithm is O((n * m) + n + (n - 1) + (n - 1)), simplifying to
+O(3n^2m);
+Or O(n^2 * m), quadratic across n multiplied by linear across m.
+--OPTIMIZED--
+The encoding will take O(n / 2) theoretically
+The pairing will also take O(n / 2) theoretically
+The merging takes O(n / 2) 
+the add O(1)
+the regex chunking could be optimized to O(m + n)
+O((m + n) + (n / 2) + (n / 2) + (n / 2));
+O(5/2n + m).
+O(n + m). not too bad. linear across both variables.
+
+OPTIMIZATION OPPORTUNITIES
+1. Rather than computing pairs through ALL chunks, including duplicates, compute only the pairs of the unique chunks and keep a separate chunk frequency table. The total frequency is the chunk frequency and the pair frequency multiplied. 
+2. Since the encoding step relies on regex chunking, there are some impossible combinations, such as "lo t" in "hello there". Tokenization time can be sped up by chunking first, and then parallelizing the encoding process across all chunks independently. This works because pairs can only be made within those bounds.
+2.5. The same trick in step 1 can be applied to the encoding process. Only keep track of unique token combinations instead of tokenizing ALL of it.
