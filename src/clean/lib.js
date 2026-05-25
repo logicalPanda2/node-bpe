@@ -63,33 +63,53 @@ function maxfreq(freqs) {
     return entries[max][1] === 1 ? null : entries[max];
 }
 /**
- * Registers a new pair into the vocabulary.
+ * Registers a new token into `vocab` and
+ * the corresponding inverse in `inverse`.
  * The value of the new string is the current 
  * length of the vocabulary. Duplicate identifiers
  * will not cause any side effects.
  * @param {Record<string, number>} vocab
+ * @param {Record<number, string>} inverse
  * @param {[string, number]} pair
  * @returns {void}
  * @example
  * ```
  * const vocab = {
  *   "foo": 0,
+ *   "he": 1,
+ *   "llo": 2,
  * };
- * const pair = ["hello", 23];
- * register(vocab, pair);
+ * const inverse = {
+ *   "0": "foo",
+ *   "1": "he",
+ *   "2": "llo",
+ * };
+ * const pair = ["1,2", 23];
+ * register(vocab, inverse, pair);
  * 
  * // vocab is now:
  * {
  *   "foo": 0,
- *   "hello": 1,
+ *   "he": 1,
+ *   "llo": 2,
+ *   "hello": 3,
+ * };
+ * // inverse is now:
+ * const inverse = {
+ *   "0": "foo",
+ *   "1": "he",
+ *   "2": "llo",
+ *   "3": "hello",
  * };
  * ```
  */
-function register(vocab, pair) {
-    if(pair[0] in vocab) return;
+function register(vocab, inverse, pair) {
+    const len = Object.entries(inverse).length;
+    const decoded = pair[0].split(",").map(c => inverse[c]).join("");
+    if(decoded in vocab) return;
 
-    const len = Object.entries(vocab).length;
-    vocab[pair[0]] = len;
+    vocab[decoded] = len;
+    inverse[len] = decoded;
 }
 /**
  * Returns the index of the first encountered 
