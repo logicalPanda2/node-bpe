@@ -180,7 +180,7 @@ function chunk(src, separators) {
  *      " ": 5,
  *  };
  *  const chunked = ["Hello", "there", " bro", "."];
- *  const tokens = encode(chunked, vocab); // [0, 1, 2, 3, 4]
+ *  const tokens = encode(chunked, vocab); // [ [0], [1, 2], [3], [4] ]
  * ```
  */
 function encode(chunked, vocab) {
@@ -189,10 +189,12 @@ function encode(chunked, vocab) {
 
     for(let i = 0; i < temp.length; i++) {
         if(tokens[i] === undefined) tokens.push([]);
+
         for(let j = temp[i].length; j > 0; j--) {
             const encoded = vocab[temp[i].slice(0, j)];
             if(encoded !== undefined) {
                 tokens[i].push(encoded);
+
                 if(j !== 0) {
                     temp[i] = temp[i].slice(j);
                     i--;
