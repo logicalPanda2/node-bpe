@@ -2,7 +2,7 @@
  * Iterates through `tokenized` and computes
  * the frequencies of all pairs' occurrences
  * without mutating existing properties in `freq`.
- * @param {string} tokenized 
+ * @param {string | number[]} tokenized 
  * @param {Record<string, number>} freqs 
  * @returns {void}
  * @example 
@@ -168,7 +168,7 @@ function chunk(src, separators) {
  * array of tokens based on `vocab` greedily.
  * @param {string[]} chunked 
  * @param {Record<string, number>} vocab 
- * @returns {number[]}
+ * @returns {number[][]}
  * @example
  * ```
  * const vocab = {
@@ -188,10 +188,11 @@ function encode(chunked, vocab) {
     const temp = [...chunked];
 
     for(let i = 0; i < temp.length; i++) {
+        if(tokens[i] === undefined) tokens.push([]);
         for(let j = temp[i].length; j > 0; j--) {
             const encoded = vocab[temp[i].slice(0, j)];
             if(encoded !== undefined) {
-                tokens.push(encoded);
+                tokens[i].push(encoded);
                 if(j !== 0) {
                     temp[i] = temp[i].slice(j);
                     i--;
