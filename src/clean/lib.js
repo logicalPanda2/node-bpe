@@ -60,7 +60,11 @@ function maxfreq(freqs) {
             max = i;
     }
 
-    return entries[max][1] === 1 ? null : entries[max];
+    if(
+        (entries[max] === undefined) ||
+        (entries[max][1] === 1)
+    ) return null;
+    else return entries[max];
 }
 /**
  * Registers a new token into `vocab` and
