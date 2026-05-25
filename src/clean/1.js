@@ -91,3 +91,26 @@ function register(vocab, pair) {
     const len = Object.entries(vocab).length;
     vocab[pair[0]] = len;
 }
+/**
+ * Returns the index of the first encountered 
+ * separator in `src` that is in `separators`.
+ * An empty `src` or `separators` will return 0.
+ * @param {string} src
+ * @param {string} separators
+ * @returns {void}
+ * @example
+ * ```
+ * const src = "Hello there";
+ * const separator = " ";
+ * const index = strpbrk(src, separator); // 5
+ * ```
+ */
+function strpbrk(src, separators) {
+    for(let i = 0; i < src.length; i++) {
+        for(let j = 0; j < separators.length; j++) {
+            if(src[i] === separators[j]) return i;
+        }
+    }
+
+    return 0;
+}
