@@ -183,3 +183,5 @@ function encode(chunked, vocab) {
 
     return tokens;
 }
+
+export { pfreq, maxfreq, register, strpbrk, chunk, encode };
