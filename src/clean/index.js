@@ -307,3 +307,5 @@ function tokenize(src, separators, vocab) {
 
     return tokens;
 }
+
+export { vocab, inverse, trainBPE, tokenize };
