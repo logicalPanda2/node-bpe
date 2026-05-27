@@ -12,6 +12,8 @@ I plan to further iterate on this until it reaches or gets close to a throughput
 
 ## Performance
 
-1. `src/optimized/iteration-2.js`: rough measurement of **8KB/200ms**
-2. Estimated throughput: **0.04KB/ms**
-3. Required performance boost to reach 1KB/ms: **25x**
+1. `src/optimized/iteration-3.js`:
+    - rough measurement of **8KB/45ms** and **18KB/120ms**
+    - resulting in **~300 merges** and **~840 merges** respectively
+2. Estimated throughput: **0.16KB/ms**
+3. Required performance boost to reach 1KB/ms: **6x**
