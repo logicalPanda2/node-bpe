@@ -13,6 +13,9 @@ git clone https://github.com/logicalPanda2/node-bpe
 The full script below is available in `./example.js`.
 ```js
 import nodeBPE from "./src/index.js";
+import tokenize from "./src/tokenizer.js";
+
+import nodeBPE from "./src/index.js";
 
 const corpus = "The old wizard lived in a tall tower ..."; // full corpus in ./example.js
 const merges = 128;
@@ -33,9 +36,13 @@ const { tokens_learned, merges_done, time_taken } = nodeBPE.train({
 for(const [string, token] of tokens_learned) {
     console.log(`${token}: \`${string}\``);
 }
-console.log(`------------------------------`)
+console.log(`------------------------------`);
 console.log(`Merges done: ${merges_done}`);
 console.log(`Time taken ${time_taken}`);
+console.log("");
+const str = "The old wizard";
+const tokens = tokenize(str, vocabulary);
+console.log(`Source string: "The old wizard"\nTokens: [${tokens.join(", ")}]`);
 ```
 
 ## Algorithms
