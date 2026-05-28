@@ -1,6 +1,6 @@
 # node-bpe
 
-A library for the byte-level BPE algorithm used in training LLM vocabularies, and a MaxMatch tokenization algorithm, implemented in Node.js with no external dependencies.
+A library for the byte-level BPE algorithm used to train LLM vocabularies, and a MaxMatch tokenization algorithm, implemented in Node.js with no external dependencies.
 
 ## Installation
 
