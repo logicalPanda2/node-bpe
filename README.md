@@ -37,7 +37,9 @@ for(const [string, token] of tokens_learned) {
 console.log(`------------------------------`);
 console.log(`Merges done: ${merges_done}`);
 console.log(`Time taken ${time_taken}`);
+
 console.log("");
+
 const str = "The old wizard";
 const tokens = tokenize(str, vocabulary);
 console.log(`Source string: "The old wizard"\nTokens: [${tokens.join(", ")}]`);
