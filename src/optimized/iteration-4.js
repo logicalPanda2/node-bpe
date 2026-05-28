@@ -15,6 +15,8 @@
 //      Batch merging
 //      Priority queues
 
+// This is the final optimization iteration.
+
 export class Node {
     constructor(value, id, prev = null, next = null) {
         this.value = value;
