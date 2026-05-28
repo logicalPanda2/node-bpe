@@ -10,5 +10,5 @@ The source code in `src/clean` is the clean, modular, but very slow first attemp
 
 ## Final Iteration: Iteration 4
 
-1. Final extrapolated throughput: **0.12KB at scale**
-2. Best case: **0.2KB** with warm CPU cache and good merge placements.
+1. Final extrapolated throughput: **0.12KB/ms at scale**
+2. Best case: **0.2KB/ms** with warm CPU cache and good merge placements.
