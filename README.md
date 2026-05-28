@@ -58,7 +58,7 @@ The extrapolated throughput at scale is **0.12MB/s**.
 
 ### MaxMatch Algorithm
 
-Simple longest-prefix approach; Chosen over classic BPE because of practical purposes.
+Simple longest-prefix approach; Chosen over classic BPE for practical reasons.
 
 ### License
 
