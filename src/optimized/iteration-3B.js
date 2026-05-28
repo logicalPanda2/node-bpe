@@ -1,10 +1,69 @@
-import { Node, DoublyLinkedList } from "../misc/linked-list.js";
-
 // METADATA
-// 8 KB of text (same corpus as iteration-0.js)
+// This file is meaningless as an optimization achievement.
+// This file is an archive of more "robust" improvement of iteration-3, such as:
+//   not guaranteeing delete pairs[oldKeys]
+//   separating frequencies from pairs to avoid confusing logic
+//   looping through all current non-stale nodes rather than all present nodes
+// But for optimization, it is way inferior, measuring at 8KB/75ms or 0.1KB/ms.
 
-// OPTIMIZED:
-// linked list refactor and move pair counting outside hot loop: 45ms average
+export class Node {
+    constructor(value, id, prev = null, next = null) {
+        this.value = value;
+        this.prev = prev;
+        this.next = next;
+    }
+
+    insert(node) {
+        node.next = this.next;                  // B.next = C
+        node.prev = this;                       // B.prev = A
+        if(this.next)                           // ensure C is not null
+            this.next.prev = node;              // C.prev = B
+        this.next = node;                       // A.next = B
+    }
+
+    redirect() {
+        const rightPtr = this.next;
+        this.next = this.next?.next ?? null     // A.next = C || null
+        if(this.next)                           // ensure C is not null
+            this.next.prev = this;              // C.prev = A
+        
+        // additional ghost node safeguards
+        if(rightPtr) {
+            rightPtr.next = null;
+            rightPtr.prev = null;
+        }
+    }
+}
+
+export class DoublyLinkedList {
+    constructor(...values) {
+        const start = new Node(values[0]);
+        for(let i = values.length - 1; i > 0; i--) {
+            start.insert(
+                new Node(values[i])
+            );
+        }
+
+        this.start = start;
+    }
+
+    traverse() {     
+        let node = this.start;  
+        while(node.next !== null) {
+            const prev = node.prev ? node.prev.value : null;
+            const curr = node.value;
+            const next = node.next.value;
+            console.log(`${prev} -> ${curr} -> ${next}`);
+
+            node = node.next;
+        }
+
+        const prev = node.prev ? node.prev.value : null;
+        const curr = node.value;
+        const next = node.next ? node.next.value : null;
+        console.log(`${prev} -> ${curr} -> ${next}`);
+    }
+}
 
 function strpbrk(src, separators) {
     for(let i = 1; i < src.length; i++) {
@@ -72,104 +131,121 @@ function trainBPE(corpus, separators, merges, vocab, inverse) {
         tokens[i] = new DoublyLinkedList(...tokens[i]);
     }
 
-    // PAIR COUNTING
-    // within the bounds of each sublist, 
+    // INITIAL PAIR COUNTING
+    // within the bounds of each sublist,
     // count all overlapping n - 1 pairs within that list,
     // and store pointers to the start of each pair.
-    // also tally the frequencies because only unique chunks were processed previously
-    const pairs = {};
+    // there is an invariant where the token length is the same as chunk length,
+    // therefore multiply the amount of times a pair appears by however many times
+    // the chunk appears in the corpus, and store the chunk positions for future use.
     const chunkFreqArr = Object.values(chunkFrequencies);
+    const pairs = {};
+    const frequencies = {};
     for(let i = 0; i < tokens.length; i++) {
         let node = tokens[i].start;
         while(node.next !== null) {
             const pair = [node.value, node.next.value];
             if(!pairs[pair]) {
                 pairs[pair] = {
-                    0: node,
+                    0: { node: node, chunkId: i },
                     nextId: 1,
-                    frequencies: chunkFreqArr[i],
-                    chunkIndices: [i],
-                }
+                };
             } else {
-                pairs[pair].frequencies += chunkFreqArr[i];
-                pairs[pair][pairs[pair].nextId++] = node;
-                pairs[pair].chunkIndices.push(i);
+                pairs[pair][pairs[pair].nextId++] = { node: node, chunkId: i };
             }
+            if(!frequencies[pair])
+                frequencies[pair] = chunkFreqArr[i];
+            else
+                frequencies[pair] += chunkFreqArr[i];
 
             node = node.next;
         }
     }
     
     for(let i = 0; i < merges; i++) {
-        const pairArr = Object.entries(pairs);
-        
+        const freqArr = Object.entries(frequencies);
         let max = 0;
-        for(let i = 0; i < pairArr.length; i++) {
-            if(pairArr[i][1].frequencies > pairArr[max][1].frequencies)
-                max = i;
+        for(let x = 0; x < freqArr.length; x++) {
+            if(freqArr[x][1] > freqArr[max][1])
+                max = x;
         }
 
-        if(pairArr[max][1].frequencies === 1) break;
+        if(freqArr[max][1] <= 1)
+            break;
 
-        const key = pairArr[max][0];
+        const key = freqArr[max][0];
         const keyString = key.split(",").map(c => inverse[c]).join("");
-        let i = 0;
-        while(true) {
-            const oldLeftPairKey = [pairs[key][i].prev?.value, pairs[key][i].value];
-            const oldRightPairKey = [pairs[key][i].next?.value, pairs[key][i].next?.next?.value];
-            if(pairs[oldLeftPairKey])
-                delete pairs[oldLeftPairKey];
-                // pairs[oldLeftPairKey].frequencies -= chunkFreqArr[pairs[key].chunkIndices[i]];
-            if(pairs[oldRightPairKey])
-                delete pairs[oldRightPairKey];
-                // pairs[oldRightPairKey].frequencies -= chunkFreqArr[pairs[key].chunkIndices[i]];
-
-            pairs[key][i].value = VOCAB_SIZE;
-            pairs[key][i].redirect();
-
-            if(pairs[key][i].prev) {
-                pairs[key][i].prev.next = pairs[key][i];
-            }
-
-            const newLeftPairKey = [pairs[key][i].prev?.value, pairs[key][i].value];
-            const newRightPairKey = [pairs[key][i].value, pairs[key][i].next?.value];
-            if(newLeftPairKey[0])
-                if(!pairs[newLeftPairKey]) {
-                    pairs[newLeftPairKey] = {
-                        0: pairs[key][i].prev,
-                        nextId: 1,
-                        // if something is wrong, all lines with the chunkIndices is at fault
-                        frequencies: chunkFreqArr[pairs[key].chunkIndices[i]],
-                        chunkIndices: [pairs[key].chunkIndices[i]],
-                    }
-                } else {
-                    pairs[newLeftPairKey].frequencies += chunkFreqArr[pairs[key].chunkIndices[i]];
-                    pairs[newLeftPairKey][pairs[newLeftPairKey].nextId++] = pairs[key][i].prev;
-                    pairs[newLeftPairKey].chunkIndices.push(pairs[key].chunkIndices[i]);
-                }
-            if(newRightPairKey[1])
-                if(!pairs[newRightPairKey]) {
-                    pairs[newRightPairKey] = {
-                        0: pairs[key][i],
-                        nextId: 1,
-                        // if something is wrong, all lines with the chunkIndices is at fault
-                        frequencies: chunkFreqArr[pairs[key].chunkIndices[i]],
-                        chunkIndices: [pairs[key].chunkIndices[i]],
-                    }
-                } else {
-                    pairs[newRightPairKey].frequencies += chunkFreqArr[pairs[key].chunkIndices[i]];
-                    pairs[newRightPairKey][pairs[newRightPairKey].nextId++] = pairs[key][i];
-                    pairs[newRightPairKey].chunkIndices.push(pairs[key].chunkIndices[i]);
-                }
-            
-            i++;
-            if(!pairs[key][i])
-                break;
-        }
-        
-        delete pairs[key];
         vocab[keyString] = VOCAB_SIZE;
         inverse[VOCAB_SIZE] = keyString;
+
+        const pair = pairs[key];
+        let x = 0;
+        for(let x = 0; x < pair.nextId; x++) {
+            if(!pair[x])
+                continue;
+            
+            const oldLeftPairKey = [pair[x].node.prev?.value, pair[x].node.value];
+            const oldRightPairKey = [pair[x].node.next?.value, pair[x].node.next?.next?.value];
+            if(pairs[oldLeftPairKey]) {
+                frequencies[oldLeftPairKey] -= chunkFreqArr[pair[x].chunkId];
+                for(let z = 0; z < pairs[oldLeftPairKey].nextId; z++) {
+                    if(!pairs[oldLeftPairKey][z])
+                        continue;
+
+                    if(pairs[oldLeftPairKey][z].node.next === pair[x].node)
+                        delete pairs[oldLeftPairKey][z];
+                }
+            }
+            if(pairs[oldRightPairKey]) {
+                frequencies[oldRightPairKey] -= chunkFreqArr[pair[x].chunkId];
+                for(let z = 0; z < pairs[oldRightPairKey].nextId; z++) {
+                    if(!pairs[oldRightPairKey][z])
+                        continue;
+
+                    if(pairs[oldRightPairKey][z].node.prev === pair[x].node.next)
+                        delete pairs[oldRightPairKey][z];
+                }
+            }
+
+            pair[x].node.value = VOCAB_SIZE;
+            pair[x].node.redirect();
+
+            const newLeftPairKey = [pair[x].node.prev?.value, pair[x].node.value];
+            const newRightPairKey = [pair[x].node.value, pair[x].node.next?.value];
+            if(newLeftPairKey[0]) {
+                if(!pairs[newLeftPairKey]) {
+                    pairs[newLeftPairKey] = {
+                        0: { node: pair[x].node.prev, chunkId: pair[x].chunkId },
+                        nextId: 1,
+                    }
+                } else {
+                    pairs[newLeftPairKey][pairs[newLeftPairKey].nextId++] = 
+                        { node: pair[x].node.prev, chunkId: pair[x].chunkId };
+                }
+                if(!frequencies[newLeftPairKey])
+                    frequencies[newLeftPairKey] = chunkFreqArr[pair[x].chunkId];
+                else
+                    frequencies[newLeftPairKey] += chunkFreqArr[pair[x].chunkId];
+            }
+            if(newRightPairKey[1]) {
+                if(!pairs[newRightPairKey]) {
+                    pairs[newRightPairKey] = {
+                        0: { node: pair[x].node, chunkId: pair[x].chunkId },
+                        nextId: 1,
+                    }
+                } else {
+                    pairs[newRightPairKey][pairs[newRightPairKey].nextId++] = 
+                        { node: pair[x].node, chunkId: pair[x].chunkId };
+                }
+                if(!frequencies[newRightPairKey])
+                    frequencies[newRightPairKey] = chunkFreqArr[pair[x].chunkId];
+                else
+                    frequencies[newRightPairKey] += chunkFreqArr[pair[x].chunkId];
+            }
+        }
+
+        delete pairs[key];
+        delete frequencies[key];
         VOCAB_SIZE++;
     }
 
@@ -842,6 +918,9 @@ const merges = 1000;
 const s = performance.now();
 const _merges = trainBPE(corpus, separators, merges, vocab, inverse);
 const e = performance.now();
-console.log(`merges: ${_merges.merges}`);
-// console.log(..._merges.learned);
+// for(const [key, value] of _merges.learned) {
+//     console.log(`${value}: ${key}`);
+// }
+console.log(`------------------------------`);
+console.log(`Merges done: ${_merges.merges}`);
 console.log(`Time taken: ${e - s}ms`);
