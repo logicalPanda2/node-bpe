@@ -1,14 +1,32 @@
-# Byte-Level BPE Attempt
+# node-bpe
 
-## Description
+A library for the byte-level BPE algorithm for training LLM vocabularies and a MaxMatch tokenization algorithm, implemented in Node.js with no external dependencies.
 
-Personal study of the byte-level BPE (Byte Pair Encoding) algorithm used for LLM tokenization. 
+## Installation
 
-The source code in `src/clean` is the clean, modular, but very slow first attempt, training on:
-1. **1KB of text** in about **30ms**, resulting in about **90 merges**
-2. **10KB of text** in about **700ms**, resulting in about **400 merges** 
+```
+git clone https://github.com/logicalPanda2/node-bpe
+```
 
-## Final Iteration: Iteration 4
+## Usage
 
-1. Final extrapolated throughput: **0.12KB at scale**
-2. Best case: **0.2KB** with warm CPU cache and good merge placements.
+Added later
+
+## Algorithms
+
+### BPE Algorithm
+
+Standard byte-level BPE implementation with:
+- Linked lists for fast merging
+- Merged pair hashmap + frequency count
+- Unique-word optimization for fast tokenization
+
+The extrapolated throughput at scale is **0.12MB/s**.
+
+### MaxMatch Algorithm
+
+Simple longest-prefix approach; Chosen over classic BPE because of practical purposes.
+
+### License
+
+MIT
