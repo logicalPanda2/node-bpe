@@ -15,8 +15,6 @@ The full script below is available in `./example.js`.
 import nodeBPE from "./src/index.js";
 import tokenize from "./src/tokenizer.js";
 
-import nodeBPE from "./src/index.js";
-
 const corpus = "The old wizard lived in a tall tower ..."; // full corpus in ./example.js
 const merges = 128;
 const separators = nodeBPE.defaultSeparators;
