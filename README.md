@@ -10,10 +10,7 @@ The source code in `src/clean` is the clean, modular, but very slow first attemp
 
 I plan to further iterate on this until it reaches or gets close to a throughput of 1MB/s or 1KB/ms.
 
-## Performance
+## Final Iteration: Iteration 4
 
-1. `src/optimized/iteration-4.js`:
-    - rough measurement of **8KB/40ms** and **20KB/178ms**
-    - resulting in **~300 merges** and **~900 merges** respectively
-2. Estimated throughput: **0.12KB/ms**, at scale
-3. Required performance boost to reach 1KB/ms: **8.5x**
+1. Final extrapolated throughput: **0.12KB at scale**
+2. Best case: **0.2KB** with warm CPU cache and good merge placements.
