@@ -1,4 +1,6 @@
 import DoublyLinkedList from "./DoublyLinkedList.js";
+import path from "node:path";
+import fs from "node:fs";
 
 export default class nodeBPE {
     static train({
@@ -456,4 +458,16 @@ export const strpbrk = (src, separators) => {
     }
 
     return src.length;
+}
+
+export const saveToFileOverwrite = async (relativePath, vocabulary) => {
+    const abs = path.resolve(relativePath);
+    await fs.writeFile(
+        abs,
+        JSON.stringify(vocabulary, null, 4),
+        (err) => {
+            if(err) console.log("An unexpected error has occurred.");
+            console.log(`Saved to ${relativePath}`);
+        }
+    );
 }

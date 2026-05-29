@@ -1,4 +1,4 @@
-export default function (source, vocabulary) {
+export default function tokenize(source, vocabulary) {
     const tokens = [];
     let copy = source;
     let i = copy.length;

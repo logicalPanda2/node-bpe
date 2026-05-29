@@ -43,6 +43,10 @@ console.log("");
 const str = "The old wizard";
 const tokens = tokenize(str, vocabulary);
 console.log(`Source string: "The old wizard"\nTokens: [${tokens.join(", ")}]`);
+
+// Optionally save the result:
+// await saveToFileOverwrite("./vocab.json", vocabulary);
+
 ```
 
 ## Algorithms
